@@ -29,52 +29,21 @@ func Download(address string) (string, error) {
 }
 
 // ExtractURLS finds and extracts urls in a page from hyperlink tags
-func ExtractURLS(page string, step int) map[string]int {
-
-	lines := strings.Split(page, "\n")
-	var chunks [][]string
-	for step < len(lines) {
-		lines, chunks = lines[step:], append(chunks, lines[0:step:step])
-	}
-	chunks = append(chunks, lines)
-
-	urls := make(chan string, len(chunks))
-	done := make(chan bool, len(chunks))
-	for _, c := range chunks {
-		go extractFromSection(c, urls, done)
-	}
-
-	addresses := make(map[string]int)
-	dc := 0
-	for {
-		select {
-		case u, more := <-urls:
-			if !more {
-				return addresses
-			}
-			addresses[u] += 1
-		case <-done:
-			dc += 1
-			if dc == len(chunks) {
-				close(urls)
-			}
-		}
-	}
-}
-
-// extractFromSection goes through a section and tries to find any urls
-func extractFromSection(chunk []string, urls chan<- string, done chan<- bool) {
-	for _, l := range chunk {
+func ExtractURLS(page string) map[string]bool {
+	addresses := make(map[string]bool)
+	for _, l := range strings.Split(page, "\n") {
 		u, extracted := extractURL(l)
 		if extracted {
-			urls <- u
+			addresses[u] = true
 		}
 	}
-	done <- true
+	return addresses
 }
 
 // extractURL attemps to find a url tag in a line and extract the address
 func extractURL(line string) (string, bool) {
+	//TODO: Fix bug around detecting non html hrefs
+	//TODO: Complete relative links
 	startIndex := strings.Index(strings.ToLower(line), "href=\"")
 	if startIndex == -1 {
 		return "", false

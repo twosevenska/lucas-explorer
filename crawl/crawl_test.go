@@ -86,14 +86,14 @@ func TestExtractURLS(t *testing.T) {
 	</body></html>
 `
 
-	expected := map[string]int{
-		"http://info.cern.ch/hypertext/WWW/TheProject.html":          1,
-		"http://line-mode.cern.ch/www/hypertext/WWW/TheProject.html": 1,
-		"http://home.web.cern.ch/topics/birth-web":                   1,
-		"http://home.web.cern.ch/about":                              3,
+	expected := map[string]bool{
+		"http://info.cern.ch/hypertext/WWW/TheProject.html":          true,
+		"http://line-mode.cern.ch/www/hypertext/WWW/TheProject.html": true,
+		"http://home.web.cern.ch/topics/birth-web":                   true,
+		"http://home.web.cern.ch/about":                              true,
 	}
 
-	result := ExtractURLS(testCase, 2)
+	result := ExtractURLS(testCase)
 
 	for u, c := range expected {
 		if len(result) != len(expected) {
@@ -102,7 +102,7 @@ func TestExtractURLS(t *testing.T) {
 
 		if result[u] != c {
 			t.Errorf("Failed assertion: expected len different from result len: \n%+v\n%+v\n", expected, result)
-			t.Errorf("Failed assertion for %s: expected counter %d got %d", u, c, result[u])
+			t.Errorf("Failed assertion for %s: expected counter %v got %v", u, c, result[u])
 		}
 	}
 
